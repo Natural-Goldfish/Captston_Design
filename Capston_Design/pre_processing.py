@@ -1,8 +1,5 @@
 from src.utils import linear_interpolation
-<<<<<<< HEAD
-=======
 
->>>>>>> 82bc711d03fc45958871ddd3742ff8d72680feed
 import pandas as pd
 import numpy as np
 from pandas import read_csv, Series, DataFrame
@@ -31,7 +28,8 @@ def interpolation():
     #print(df[0]) # 시간값은 1부터
     # 데이터의 0번째가 0시부터가 아니면 그냥 채워버리기
     dt_first = datetime.strptime(df[0][1],'%Y-%m-%d %H:%M')
-    print(dt_first.hour, type(dt_first.hour))
+    #print(dt_first.hour, type(dt_first.hour))
+    '''
     mcnt=0
     hcnt = 0
     first_hour = int(dt_first.hour)
@@ -61,18 +59,70 @@ def interpolation():
             if first_min <10:
                 df[0][1] += ":"+"0"+str(first_min)
             elif first_min >=10:
-                df[0][1] += ":"+str(first_min)
+                df[0][1] += ":"+str(first_min)py
         first_min = 60
         mcnt = mcnt -1
         first_hour = first_hour - 1
     print("맨 앞에 추가해야할 행의 갯수는 : ",mcnt-1)
     #초기화 시킨 앞에 행 완료.
-    #print(df.head(30))
-    print(dt_first.minute+40)
-    for date in range(len(df[0])):
-        if date > 2:
-            dt_plus = datetime.strptime(df[0][date],'%Y-%m-%d %H:%M')
-            dt_prev = datetime.strptime(df[0][date-1],'%Y-%m-%d %H:%M')
+    '''
+    realdate = '2'
+    realvalue = '3'
+    data=[] 
+ 
+    raw_data = pd.DataFrame(data)
+    raw_data.to_csv('./data/processed/sample.csv')
+    
+    
+    csv = pd.read_csv('./data/unprocessed/70man.csv')
+
+    df2 = pd.DataFrame(data=None, columns=csv.columns,index=csv.index) #초기화 시킨 csv
+    df2 = df2.drop(index)
+    print(df2)
+    df2.to_csv('./data/processed/sample.csv')
+
+    for date in df[0]:
+        #조건 7.5 , 22.5, 37.5, 52.5로 기준을 나눈다.
+        #상세 조건으로 23시 이고 분이 52.5보다 큰경우 해당 값의 시간은 0으로 바꾼다.
+        realtime = datetime.strptime(date,'%Y-%m-%d %H:%M')
+        realhour = realtime.hour
+        realhour2 = int(realhour)
+        realminute = realtime.minute
+        realminute2 = int(realminute)
+        #조건 1. 시간이 23시이냐 아니냐
+        #조건 2. 분에 대해서 큰지 작은지 범위로 00 15 30 45로 기준화처리
+        if realhour2 < 23:
+            if realminute2 < 7.5:
+                realminute2 = 0
+            elif realminute2 > 7.5 and realminute2 < 22.5:
+                realminute2 = 15
+            elif realminute2 > 22.5 and realminute2 < 37.5:
+                realminute2 = 30
+            elif realminute2 > 37.5 and realminute2 < 52.5:
+                realminute2 = 45
+            elif realminute2 > 52.5:
+                realminute2 = 0
+                realhour2+=1
+                #분이 52.5보다 크면 다음 시간으로 넘겨서 00분으로 처리
+        elif realhour2 == 23:
+            if realminute2 < 7.5:
+                realminute2 = 0
+            elif realminute2 > 7.5 and realminute2 < 22.5:
+                realminute = 15
+            elif realminute2 > 22.5 and realminute2 < 37.5:
+                realminute2 = 30
+            elif realminute2 > 37.5 and realminute2 < 52.5:
+                realminute2 = 45
+            elif realminute2 > 52.5:
+                realminute2 = 0
+                realhour2 = 0
+        realhour = str(realhour2)
+        realminute = str(realminute2)
+        
+
+        # 7. Excel 파일로 저장
+        #df_att.to_excel('36_official_language.xlsx', index=False)
+        #print(realhour," ",realminute)
             #if(dt_plus.minute - dt_prev.minute > 20):
                 #평범하게 중간에 빈 경우
 
@@ -95,8 +145,3 @@ def main():
     interpolation()
 if __name__ == "__main__":
     main()
-
-<<<<<<< HEAD
-
-=======
->>>>>>> 82bc711d03fc45958871ddd3742ff8d72680feed
