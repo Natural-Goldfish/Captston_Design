@@ -1,0 +1,20 @@
+Input dimension                         : TARGET VALUES AFTER
+Sequence length                         : 3일
+How many layers are we gonna stack      : 1
+How far are we gonna predict            : 3일
+    ㄴWhich could be same with the target values.
+Target values                           : ? ### HOW ???? SEARCH
+    ㄴHow we gonna define the target values? ex) Kind of embedding method?
+Loss function                           : MSE
+Optimizer                               : RMSProp
+Learning Rate                           : 10e-3
+Dropout                                 : 0.1
+
+
+Interpolation Method                    : Linear
+What's the format of the Dataset        : CSV
+    ㄴAre we gonna use csv file directly?
+    ㄴAre we gonna save the datas as TFRecord? or something different?
+The proportion of train and val dataset : 9 : 1
+
+
