@@ -1,4 +1,8 @@
 from src.utils import linear_interpolation
+<<<<<<< HEAD
+=======
+
+>>>>>>> 82bc711d03fc45958871ddd3742ff8d72680feed
 import pandas as pd
 import numpy as np
 from pandas import read_csv, Series, DataFrame
@@ -92,4 +96,7 @@ def main():
 if __name__ == "__main__":
     main()
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 82bc711d03fc45958871ddd3742ff8d72680feed
