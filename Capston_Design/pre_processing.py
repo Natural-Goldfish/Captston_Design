@@ -1,5 +1,4 @@
 from src.utils import linear_interpolation
-<<<<<<< HEAD
 import pandas as pd
 import numpy as np
 from pandas import read_csv, Series, DataFrame
@@ -93,12 +92,4 @@ def main():
 if __name__ == "__main__":
     main()
 
-=======
 
-"""
-This file makes unprocessed csv file as a perfectly processed csv file for training
-The method of linear interpolation exist in the src\utils directories.
-
-"""
-# TODO
->>>>>>> 1213a5e065bdba9bd2dfd675dcad19ad81ccac32
