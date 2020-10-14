@@ -109,60 +109,271 @@ def interpolation2():
     
     # csv를 부른다.
     cnt = 0
+
+     #부족한 데이터 메꾸기 위한 새 dataframe을 만들어서 새로운 csv에 저장하기.
+    newdf = pd.DataFrame(columns = ['Time','Gluco'])
+    newdf.to_csv('./data/processed/newdf.csv') 
+    newdf['Gluco'].astype('int')
     for stop,date in enumerate(df[1]):
         if stop == 0:
             continue
         else:
-            if stop >=2:
+            if stop ==1:
+                #부족한 데이터 메꾸기 위한 새 dataframe을 만들어서 새로운 csv에 저장하기.
+                realdate1 = datetime.strptime(date,'%Y-%m-%d %H:%M')
+                day = realdate1.day
+                month = realdate1.month
+                minute = realdate1.minute
+                hour = realdate1.hour
+
+                hour2 = str(hour)
+                minute2 = str(minute)
+                day2 = str(day)
+                month2 = str(month)
+                if int(minute2) < 10:
+                    minute2 = '0'+minute2
+                if int(day2) < 10:
+                    day2 = '0'+day2
+                if int(month2) < 10:
+                    month2 = '0'+month2
+                realdata1 = str(realdate1.year)+'-'+month2+'-'+day2+' '+hour2+':'+minute2
+                newdf.loc[cnt] = {'Time':realdata1,'Gluco':str(df[2][stop])}
+                #새로 생성되는 newdf csv 파일에 기존의 혈당데이터를 저장
+                
+                newdf.to_csv('./data/processed/newdf.csv')
+                continue
+                cnt+=1
+            elif stop >=2:
                 realtime = datetime.strptime(date,'%Y-%m-%d %H:%M')
                 pasttime = datetime.strptime(df[1][stop-1],'%Y-%m-%d %H:%M')
-            
+                
+                # 새로 추가될 데이터 이전에 기존 데이터들을 먼저 삽입
+                day = pasttime.day
+                month = pasttime.month
+                minute = pasttime.minute
+                hour = pasttime.hour
+
+                hour2 = str(hour)
+                minute2 = str(minute)
+                day2 = str(day)
+                month2 = str(month)
+                if int(minute2) < 10:
+                    minute2 = '0'+minute2
+                if int(day2) < 10:
+                    day2 = '0'+day2
+                if int(month2) < 10:
+                    month2 = '0'+month2
+                realdata = str(pasttime.year)+'-'+month2+'-'+day2+' '+hour2+':'+minute2
+                newdf.loc[cnt] = {'Time':realdata,'Gluco':str(df[2][stop])}
+                #새로 생성되는 newdf csv 파일에 기존의 혈당데이터를 저장
+                
+                newdf.to_csv('./data/processed/newdf.csv')
+                cnt += 1
                 if 23 >pasttime.hour:
+                    # 뒤에 시간이 전 시간보다 큰 경우
                     if realtime.hour > pasttime.hour:
                         if ((realtime.hour*60+realtime.minute)-(pasttime.hour*60+pasttime.minute)) > 15:
                             #csv 분리하기
-                            
-                            
-                            print("past :",pasttime, 'stop',stop)
-                            
-                            cnt+=1
-                            
-                            rows = pd.read_csv(input_file)
-                            
-                            # split indexes
-                            idxes = np.array_split(rows.index.values, stop)
+                            #print("past :",pasttime, 'stop',stop, 'real',realtime)
+                            #추가할 데이터 갯수 및 데이터들
 
-                            chunks = [rows.loc[idx] for idx in idxes]
-                            rows.to_csv('./data/processed/first.csv')
-                            print("ya")
+                            #빈 부분 만들어내기
+                            count = ((realtime.hour*60+realtime.minute)-(pasttime.hour*60+pasttime.minute))/15 -1
                             
-                            second = pd.read_csv(input_file,chunksize=len(df[1]))
-                            for j, data in enumerate(second):
+                            #새 데이터 시작 일/ 시간/ 분
+                            minute3 = pasttime.minute
+                            hour3 = pasttime.hour
+                            day3 = pasttime.day
+                            month3 = pasttime.month
+                            count = int(count)
+                            
+                            #pasttime시작으로 15분씩 추가하면서 새로운 데이터를 생성해낸다
+                            for i in range(count):
+                                minute3 +=15
+                                if minute3 >= 60:
+                                    minute3 -=60
+                                    hour3 +=1
+                                    if hour3 == 0:
+                                        #날짜를 하루 올리기
+                                        day3+=1
+                                        hour3 -=24
+                                        thirtyone = [1,3,5,7,8,10,12]
+                                        thirty = [4,6,9,11]
+                                        feb= [2]
+                                        if day3 >31:
+                                            if month3 in thirtyone:
+                                                day3 -= 31
+                                                month3+=1
+                                            elif month3 in thirty:
+                                                day3 -=30
+                                                month3+=1
+                                            else:
+                                                day3 -=28
+                                                month3+=1 
+                                #day hour minute이 10보다 작으면 앞에 0붙여서 string으로 변환
+                                day4 = str(day3)
+                                hour4 = str(hour3)
+                                minute4 = str(minute3)
+                                month4 = str(month3)
+                                if int(month4) < 10:
+                                    month4 = '0'+month4
+                                if int(minute4) < 10:
+                                    minute4 = '0'+minute4
+                                if int(hour4) < 10:
+                                    hour4 = '0'+hour4
+                                if int(day4) < 10:
+                                    day4 = '0'+day4
                                 
-                                print("hi")
-                                data.to_csv('./data/processed/second.csv'.format(j))
-                            
+                                newdate4 = str(realtime.year)+'-'+month4+'-'+day4+' '+hour4+':'+minute4
+                                #print("new date",newdate4)
+                                #이제 새로 생성한 데이터를 저장한다.
+                                newdf.loc[cnt,'Time'] = newdate4
+                                newdf.loc[cnt,'Gluco'] = str(np.nan)
+                                 #새로 생성되는 newdf csv 파일에 기존의 혈당데이터를 저장
+                                newdf.to_csv('./data/processed/newdf.csv')
+                                cnt += 1
+
+                    
                     elif realtime.hour < pasttime.hour:
                         if (((realtime.hour+24)*60+realtime.minute)-(pasttime.hour*60+pasttime.minute)) > 15:
-                            cnt+=1
-                            print("past :",pasttime, 'stop',stop)
                             
+                            #print("past :",pasttime, 'stop',stop, 'real',realtime)
+                            count = (((realtime.hour+24)*60+realtime.minute)-(pasttime.hour*60+pasttime.minute))/15 -1
+                            #print(count)
+                            minute5 = pasttime.minute
+                            hour5 = pasttime.hour
+                            day5 = pasttime.day
+                            month5 = pasttime.month
+                            count = int(count)
                             
+                            #pasttime시작으로 15분씩 추가하면서 새로운 데이터를 생성해낸다
+                            for i in range(count):
+                                minute5 +=15
+                                if minute5 >= 60:
+                                    minute5 -=60
+                                    hour5 +=1
+                                    if hour5 == 24:
+                                        #날짜를 하루 올리기
+                                        day5+=1
+                                        hour5 -=24
+                                        thirtyone = [1,3,5,7,8,10,12]
+                                        thirty = [4,6,9,11]
+                                        feb= [2]
+                                        if day5 >31:
+                                            if month5 in thirtyone:
+                                                day5 -= 31
+                                                month5+=1
+                                            elif month5 in thirty:
+                                                day5 -=30
+                                                month5+=1
+                                            else:
+                                                day5 -=28
+                                                month5+=1 
 
+                                #day hour minute이 10보다 작으면 앞에 0붙여서 string으로 변환
+                                
+                                day6 = str(day5)
+                                hour6 = str(hour5)
+                                minute6 = str(minute5)
+                                month6 = str(month5)
+                                if int(minute6) < 10:
+                                    minute6 = '0'+minute6
+                                if int(hour6) < 10:
+                                    hour6 = '0'+hour6
+                                if int(day6) < 10:
+                                    day6 = '0'+day6
+                                if int(month6) < 10:
+                                    month6 = '0'+month6
+                                newdate6 = str(realtime.year)+'-'+month6+'-'+day6+' '+hour6+':'+minute6
+                                #print("new date",newdate6)
+                                
+                                #이제 새로 생성한 데이터를 저장한다.
+                                #newdf.loc[cnt,'Time'] = newdate
+                                #newdf.loc[cnt,'Gluco'] = np.nan
+                                newdf.loc[cnt] = {'Time':newdate6, 'Gluco': str(np.nan)}
+                                #새로 생성되는 newdf csv 파일에 기존의 혈당데이터를 저장
+                                newdf.to_csv('./data/processed/newdf.csv')
+                                cnt = cnt+1
 
+                elif pasttime.hour ==23:
+                    if realtime.hour < pasttime.hour:
+                        if (((realtime.hour+24)*60+realtime.minute)-(pasttime.hour*60+pasttime.minute)) > 15:
+                            
+                            #print("past :",pasttime, 'stop',stop, 'real',realtime)
+                            count = (((realtime.hour+24)*60+realtime.minute)-(pasttime.hour*60+pasttime.minute))/15 -1
+                            #print(count)
+                            minute7 = pasttime.minute
+                            hour7 = pasttime.hour
+                            day7 = pasttime.day
+                            month7 = pasttime.month
+                            count = int(count)
+                            
+                            #pasttime시작으로 15분씩 추가하면서 새로운 데이터를 생성해낸다
+                            for i in range(count):
+                                minute7 +=15
+                                if minute7 >= 60:
+                                    minute7 -=60
+                                    hour7 +=1
+                                    if hour7 == 24:
+                                        #날짜를 하루 올리기
+                                        day7+=1
+                                        hour7 -=24
+                                        thirtyone = [1,3,5,7,8,10,12]
+                                        thirty = [4,6,9,11]
+                                        feb= [2]
+                                        if day7 >31:
+                                            if month7 in thirtyone:
+                                                day7 -= 31
+                                                month7+=1
+                                            elif month7 in thirty:
+                                                day7 -=30
+                                                month7+=1
+                                            else:
+                                                day7 -=28
+                                                month7+=1 
 
-
-                        
-
-
-
+                                #day hour minute이 10보다 작으면 앞에 0붙여서 string으로 변환
+                                
+                                day8 = str(day7)
+                                hour8 = str(hour7)
+                                minute8 = str(minute7)
+                                month8 = str(month7)
+                                if int(minute8) < 10:
+                                    minute8 = '0'+minute8
+                                if int(hour8) < 10:
+                                    hour8 = '0'+hour8
+                                if int(day8) < 10:
+                                    day8 = '0'+day8
+                                if int(month8) < 10:
+                                    month8 = '0'+month8
+                                newdate8 = str(realtime.year)+'-'+month8+'-'+day8+' '+hour8+':'+minute8
+                                #print("new date",newdate6)
+                                
+                                #이제 새로 생성한 데이터를 저장한다.
+                                #newdf.loc[cnt,'Time'] = newdate
+                                #newdf.loc[cnt,'Gluco'] = np.nan
+                                newdf.loc[cnt] = {'Time':newdate8, 'Gluco': str(np.nan)}
+                                #새로 생성되는 newdf csv 파일에 기존의 혈당데이터를 저장
+                                newdf.to_csv('./data/processed/newdf.csv')
+                                cnt = cnt+1
+                    
 
         #realminute = realtime.minute
         #print(df[0][cnt],df[0][cnt+1])
     print(cnt)
     #시간 차이가 15분 이상 나면  csv를 분리~~ 앞에꺼 1개 뒤에꺼 1개로 따로 저장 후 뒤에꺼에 부족한 갯수만큼 추가~~~
-    
+
+def final_interpolate():
+    #먼저 빈 곳에 nan값을입력
+    df = pd.read_csv('./data/processed/newdf.csv')
+    # empty frame with desired index
+    df2 = df.interpolate()
+    df2['Gluco'] = df2['Gluco'].astype(int)
+    df2.to_csv('./data/processed/result.csv')
+
 def main():
-    interpolation2()
+    #interpolation2()
+    final_interpolate()
+    
 if __name__ == "__main__":
     main()
