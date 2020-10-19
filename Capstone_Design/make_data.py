@@ -28,7 +28,7 @@ class PreProcessing(object):
         new_data_idx = 0
         idx = 0
         while(True):
-            # Get datas from unprocessed file
+            # Get data from unprocessed file
             cur_glucose = int(dataframe["Glucose"][idx])
             cur_hour, cur_minutes = self._get_time(dataframe["Time"][idx], True)
             new_hour, new_minutes = self._calcualte_newtime(cur_hour, cur_minutes, idx)

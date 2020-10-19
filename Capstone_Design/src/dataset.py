@@ -10,8 +10,8 @@ _DAY = 96
 
 class ASPDataset(Dataset):
     """
-    This is our custom dataset. In this project, it will load datas to train from csv files.
-    If databases which have all of informations for training exist, it will load datas to train from the database
+    This is our custom dataset. In this project, it will load data to train from csv files.
+    If databases which have all of informations for training exist, it will load data to train from the database
 
     """
 
@@ -29,10 +29,10 @@ class ASPDataset(Dataset):
         return self.dataset_length
 
     def __getitem__(self, idx):
-        # Get datas for training
+        # Get data for training
         data = np.array(self.dataframe["Glucose"][idx*_DAY : idx*_DAY + (self.predict_length + self.sequence_length)*_DAY])
 
-        # Split datas to input and label
+        # Split data to input and label
         input_data = torch.tensor(data[:-(self.predict_length*_DAY)], dtype = torch.long).clone()
         label = torch.tensor(data[-(self.predict_length*_DAY):], dtype = torch.float32).clone()
         return input_data, label
