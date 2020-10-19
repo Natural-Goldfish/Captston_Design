@@ -14,7 +14,6 @@ class ASPDataset(Dataset):
     If databases which have all of informations for training exist, it will load data to train from the database
 
     """
-
     def __init__(self, file_path = _FILE_PATH, file_name = _FILE_NAME, mode = "train"):
         super().__init__()
         self.file_path = file_path
@@ -37,6 +36,4 @@ class ASPDataset(Dataset):
         label = torch.tensor(data[-(self.predict_length*_DAY):], dtype = torch.float32).clone()
         return input_data, label
 
-if __name__ == "__main__":
-    dataset = ASPDataset()
-    input_data, label = dataset[1921]
+

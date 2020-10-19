@@ -39,6 +39,7 @@ def train():
         # Training
         model.train()
         optimizer.zero_grad()
+
         for cur_iter, train_data in enumerate(train_dataloader):
             # Data load
             train_inputs, train_labels = train_data
@@ -53,6 +54,7 @@ def train():
             train_loss.backward()
             optimizer.step()
             print("TRAIN ::: EPOCH {}/{} Iteration {}/{} Loss {}".format(cur_epoch+1, _EPOCHS, cur_iter, len(train_dataloader), train_loss))
+
         # Evaludation
         model.eval()
         with torch.no_grad() :
@@ -64,7 +66,6 @@ def train():
                     val_inputs = val_inputs.cuda()
                     val_labels = val_labels.cuda()
                 _, temp_length = val_inputs.shape
-
                 val_outputs = model(val_inputs).view(-1, temp_length)
                 val_loss += criterion(val_outputs, val_labels)
             print("VAL ::: EPOCH {}/{} Loss {}".format(cur_epoch+1, _EPOCHS, cur_iter, len(val_dataloader), val_loss/len(val_dataloader)))

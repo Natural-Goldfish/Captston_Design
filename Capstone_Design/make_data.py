@@ -71,7 +71,6 @@ class PreProcessing(object):
         val_data["Glucose"] = self.new_data["Glucose"][-96*8:]
         return train_data, val_data
 
-
     def _add_data(self, new_hour, new_minutes, new_glucose):
         new_time = new_hour + ":" + new_minutes
         self.new_data["Time"].append(new_time)
