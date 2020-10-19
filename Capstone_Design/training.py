@@ -9,7 +9,7 @@ _HIDDEN_DIM = 25
 _EMBEDDING_DIM = 300
 _LEARNING_RATE = 0.001
 _EPOCHS = 2600
-_BATCH_SIZE = 128
+_BATCH_SIZE = 64
 _CUDA_FLAG = torch.cuda.is_available()
 
 _MODEL_LOAD_FLAG = False
@@ -53,7 +53,7 @@ def train():
             train_loss = criterion(train_outputs, train_labels)
             train_loss.backward()
             optimizer.step()
-            print("TRAIN ::: EPOCH {}/{} Iteration {}/{} Loss {}".format(cur_epoch+1, _EPOCHS, cur_iter, len(train_dataloader), train_loss))
+            print("TRAIN ::: EPOCH {}/{} Iteration {}/{} Loss {:.6f}".format(cur_epoch+1, _EPOCHS, cur_iter, len(train_dataloader), train_loss))
 
         # Evaludation
         model.eval()
@@ -68,7 +68,7 @@ def train():
                 _, temp_length = val_inputs.shape
                 val_outputs = model(val_inputs).view(-1, temp_length)
                 val_loss += criterion(val_outputs, val_labels)
-            print("VAL ::: EPOCH {}/{} Loss {}".format(cur_epoch+1, _EPOCHS, cur_iter, len(val_dataloader), val_loss/len(val_dataloader)))
+            print("VAL ::: EPOCH {}/{} Loss {:.6f}".format(cur_epoch+1, _EPOCHS, val_loss/len(val_dataloader)))
 
 if __name__ == "__main__":
     train()
