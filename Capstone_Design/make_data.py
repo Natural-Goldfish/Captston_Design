@@ -3,9 +3,9 @@ import pandas as pd
 import numpy as np
 
 _DATA_SAVE_PATH = "data\\processed"
-_FILE_SAVE_NAME = "70man_train.csv"
 _DATA_LOAD_PATH = "data\\unprocessed"
 _FILE_LOAD_NAME = "70man(3).csv"
+_FILE_SAVE_NAME = "70man"
 
 class PreProcessing(object):
     def __init__(self, data_load_path, file_load_name, data_save_path, file_save_name):
@@ -50,10 +50,26 @@ class PreProcessing(object):
                     new_data_idx += 1
             if len(self.new_data["Time"]) == days : break
 
-        save_df = pd.DataFrame(self.new_data, columns = ["Time", "Glucose"])
-        save_df = save_df.interpolate(method = "values")
-        save_df.to_csv(os.path.join(_DATA_SAVE_PATH, _FILE_SAVE_NAME), index = False)
+        train_new_data, val_new_data = self._split_dataset()
+        # Save train dataset
+        save_train_df = pd.DataFrame(train_new_data, columns = ["Time", "Glucose"])
+        save_train_df = save_train_df.interpolate(method = "values")
+        save_train_df.to_csv(os.path.join(_DATA_SAVE_PATH, "{}_{}.csv".format(self.save_fname, "train")), index = False)
 
+        # Save val dataset
+        save_val_df = pd.DataFrame(val_new_data, columns = ["Time", "Glucose"])
+        save_val_df = save_val_df.interpolate(method = "values")
+        save_val_df.to_csv(os.path.join(_DATA_SAVE_PATH, "{}_{}.csv".format(self.save_fname, "val")), index = False)
+
+    def _split_dataset(self):
+        # Assign 8 days to the validation dataset
+        train_data = {"Time" : [], "Glucose" : []}
+        val_data = {"Time" : [], "Glucose" : []}
+        train_data["Time"] = self.new_data["Time"][:-96*8]
+        train_data["Glucose"] = self.new_data["Glucose"][:-96*8]
+        val_data["Time"] = self.new_data["Time"][-96*8:]
+        val_data["Glucose"] = self.new_data["Glucose"][-96*8:]
+        return train_data, val_data
 
     def _add_data(self, new_hour, new_minutes, new_glucose):
         new_time = new_hour + ":" + new_minutes

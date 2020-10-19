@@ -2,11 +2,9 @@ import torch
 
 _SEQUENCE_LENGTH = 96*3
 _NUM_EMBEDDINGS= 300
-_EMBEDDING_DIM = 5
-
-_INPUT_DIM = 5
-_HIDDEN_DIM = 5
-_BATCH_SIZE = 1
+_EMBEDDING_DIM = 25
+_INPUT_DIM = 25
+_HIDDEN_DIM = 25
 
 class ASPModel(torch.nn.Module):
     """

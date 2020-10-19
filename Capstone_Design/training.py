@@ -4,10 +4,10 @@ from torch.utils.data import DataLoader
 import torch
 
 _SEQUENCE_LENGTH = 96*3
-_INPUT_DIM = 5
-_HIDDEN_DIM = 5
+_INPUT_DIM = 25
+_HIDDEN_DIM = 25
 _EMBEDDING_DIM = 300
-_LEARNING_RATE = 0.01
+_LEARNING_RATE = 0.001
 _EPOCHS = 2600
 _BATCH_SIZE = 128
 _CUDA_FLAG = torch.cuda.is_available()
@@ -17,12 +17,20 @@ _MODEL_PATH = "data\\models"
 _MODEL_LOAD_NAME = "ASPModel_{}_checkpoint.pth".format("temp")
 
 def train():
+<<<<<<< HEAD
     train_dataset = ASPDataset()
     train_dataloader = DataLoader(train_dataset, batch_size = _BATCH_SIZE, shuffle = True)
     # No val dataset yet
     
     val_dataset = ASPDataset()
     val_dataloader = Dataloader(val_dataset, batch_size = _BATCH_SIZE, shuffle = False)
+=======
+    train_dataset = ASPDataset(mode = "train")
+    train_dataloader = DataLoader(train_dataset, batch_size = _BATCH_SIZE, shuffle = False)
+    
+    val_dataset = ASPDataset(mode = "val")
+    val_dataloader = DataLoader(val_dataset, batch_size = _BATCH_SIZE, shuffle = False)
+>>>>>>> 1de75bac73576d0e14619a9d0e5722a14cbebdda
     
     # Model load
     model = ASPModel(seq_len = _SEQUENCE_LENGTH, input_dim = _INPUT_DIM, hidden_dim = _HIDDEN_DIM)
@@ -32,7 +40,7 @@ def train():
     # Use GPU, if it is available
     if _CUDA_FLAG : model.cuda()
 
-    # Loss function and Optimizer (Experimental)
+    # Loss function and Optimizer (Experimental) -> Optimizer : Adam
     criterion = torch.nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr = _LEARNING_RATE)
 
@@ -40,6 +48,7 @@ def train():
         # Training
         model.train()
         optimizer.zero_grad()
+
         for cur_iter, train_data in enumerate(train_dataloader):
             # Data load
             train_inputs, train_labels = train_data
@@ -49,14 +58,22 @@ def train():
             _, temp_length = train_inputs.shape
 
             # Update parameters
+<<<<<<< HEAD
             
             train_outputs = model(train_inputs).view(-1,temp_length)
+=======
+            train_outputs = model(train_inputs).view(-1, temp_length)
+>>>>>>> 1de75bac73576d0e14619a9d0e5722a14cbebdda
             train_loss = criterion(train_outputs, train_labels)
             train_loss.backward()
             optimizer.step()
             print("TRAIN ::: EPOCH {}/{} Iteration {}/{} Loss {}".format(cur_epoch+1, _EPOCHS, cur_iter, len(train_dataloader), train_loss))
+<<<<<<< HEAD
         # No val dataset yet
         
+=======
+
+>>>>>>> 1de75bac73576d0e14619a9d0e5722a14cbebdda
         # Evaludation
         model.eval()
         with torch.no_grad() :
@@ -67,11 +84,18 @@ def train():
                 if _CUDA_FLAG :
                     val_inputs = val_inputs.cuda()
                     val_labels = val_labels.cuda()
+<<<<<<< HEAD
                 _,temp_length = val_inputs.shape
                 val_outputs = model(val_inputs).view(-1,temp_length)
                 val_loss += criterion(val_outputs, val_labels)
             print("VAL ::: EPOCH {}/{} Loss {}".format(cur_epoch+1, _EPOCHS, cur_iter, len(val_dataloader), val_loss/len(val_dataloader)))
         
+=======
+                _, temp_length = val_inputs.shape
+                val_outputs = model(val_inputs).view(-1, temp_length)
+                val_loss += criterion(val_outputs, val_labels)
+            print("VAL ::: EPOCH {}/{} Loss {}".format(cur_epoch+1, _EPOCHS, cur_iter, len(val_dataloader), val_loss/len(val_dataloader)))
+>>>>>>> 1de75bac73576d0e14619a9d0e5722a14cbebdda
 
 if __name__ == "__main__":
     train()
