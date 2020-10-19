@@ -40,9 +40,9 @@ def train():
         # Training
         model.train()
         optimizer.zero_grad()
-        for cur_iter, train_datas in enumerate(train_dataloader):
+        for cur_iter, train_data in enumerate(train_dataloader):
             # Data load
-            train_inputs, train_labels = train_datas
+            train_inputs, train_labels = train_data
             if _CUDA_FLAG :
                 train_inputs = train_inputs.cuda()
                 train_labels = train_labels.cuda()
@@ -59,9 +59,9 @@ def train():
         model.eval()
         with torch.no_grad() :
             val_loss = 0.0
-            for cur_iter, val_datas in val_dataloader:
+            for cur_iter, val_data in val_dataloader:
                 # Data load
-                val_inputs, val_labels = val_datas
+                val_inputs, val_labels = val_data
                 if _CUDA_FLAG :
                     val_inputs = val_inputs.cuda()
                     val_labels = val_labels.cuda()
