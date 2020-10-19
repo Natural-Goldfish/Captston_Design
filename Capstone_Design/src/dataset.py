@@ -23,14 +23,14 @@ class ASPDataset(Dataset):
         self.dataframe = pd.read_csv(os.path.join(self.file_path, "{}_{}.csv".format(self.file_name, self.mode)), header = 0, names = ["Time", "Glucose"])
         self.predict_length = 3
         self.sequence_length =  3
-        self.dataset_length = int(len(self.dataframe)/_DAY) - (self.predict_length + self.sequence_length) + 1
+        self.dataset_length = int(len(self.dataframe)) - (self.predict_length*_DAY + self.sequence_length*_DAY) + 1
         
     def __len__(self):
         return self.dataset_length
 
     def __getitem__(self, idx):
         # Get data for training
-        data = np.array(self.dataframe["Glucose"][idx*_DAY : idx*_DAY + (self.predict_length + self.sequence_length)*_DAY])
+        data = np.array(self.dataframe["Glucose"][idx : idx + (self.predict_length + self.sequence_length)*_DAY])
 
         # Split data to input and label
         input_data = torch.tensor(data[:-(self.predict_length*_DAY)], dtype = torch.long).clone()
