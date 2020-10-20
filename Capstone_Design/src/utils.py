@@ -34,3 +34,4 @@ class Normalization(object):
     def de_normlize(self, data):
         de_norm_data = data*(self.max-self.min)+self.min
         return de_norm_data
+    
