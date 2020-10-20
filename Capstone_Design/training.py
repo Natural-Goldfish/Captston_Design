@@ -1,6 +1,12 @@
 from src.model import ASPModel
 from src.dataset import *
+from src.utils import Normalization
 from torch.utils.data import DataLoader
+##
+import sys
+from torch.utils.tensorboard import SummaryWriter
+writer = SummaryWriter("runs/graph")
+##
 import torch
 
 _SEQUENCE_LENGTH = 96*3
@@ -16,21 +22,20 @@ _MODEL_LOAD_FLAG = False
 _MODEL_PATH = "data\\models"
 _MODEL_LOAD_NAME = "ASPModel_{}_checkpoint.pth".format("temp")
 
+
+
 def train():
-<<<<<<< HEAD
-    train_dataset = ASPDataset()
-    train_dataloader = DataLoader(train_dataset, batch_size = _BATCH_SIZE, shuffle = True)
-    # No val dataset yet
-    
-    val_dataset = ASPDataset()
-    val_dataloader = Dataloader(val_dataset, batch_size = _BATCH_SIZE, shuffle = False)
-=======
+
     train_dataset = ASPDataset(mode = "train")
     train_dataloader = DataLoader(train_dataset, batch_size = _BATCH_SIZE, shuffle = False)
     
     val_dataset = ASPDataset(mode = "val")
     val_dataloader = DataLoader(val_dataset, batch_size = _BATCH_SIZE, shuffle = False)
->>>>>>> 1de75bac73576d0e14619a9d0e5722a14cbebdda
+
+    #Normalize
+    norm = Normalization()
+
+
     
     # Model load
     model = ASPModel(seq_len = _SEQUENCE_LENGTH, input_dim = _INPUT_DIM, hidden_dim = _HIDDEN_DIM)
@@ -44,6 +49,11 @@ def train():
     criterion = torch.nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr = _LEARNING_RATE)
 
+    writer.add_graph(model, train_dataset)
+    writer.close()
+    ##graph
+    
+    ##
     for cur_epoch in range(_EPOCHS):
         # Training
         model.train()
@@ -58,22 +68,24 @@ def train():
             _, temp_length = train_inputs.shape
 
             # Update parameters
-<<<<<<< HEAD
-            
-            train_outputs = model(train_inputs).view(-1,temp_length)
-=======
             train_outputs = model(train_inputs).view(-1, temp_length)
->>>>>>> 1de75bac73576d0e14619a9d0e5722a14cbebdda
+            train_labels= norm.normlize(train_labels) #normalize
             train_loss = criterion(train_outputs, train_labels)
             train_loss.backward()
             optimizer.step()
-            print("TRAIN ::: EPOCH {}/{} Iteration {}/{} Loss {}".format(cur_epoch+1, _EPOCHS, cur_iter, len(train_dataloader), train_loss))
-<<<<<<< HEAD
-        # No val dataset yet
-        
-=======
+            ##
+            predicted = norm.de_normlize(train_outputs)
+            running_loss += train_loss.item()
+            running_correct += (predicted == train_labels).sum().item()
 
->>>>>>> 1de75bac73576d0e14619a9d0e5722a14cbebdda
+            ##
+            if (cur_iter+1)%300 == 0:
+
+                print("TRAIN ::: EPOCH {}/{} Iteration {}/{} Loss {}".format(cur_epoch+1, _EPOCHS, cur_iter, len(train_dataloader), train_loss))
+                writer.add_scaler('training loss', train_loss/100, cur_epoch*len(train_dataloader))
+                writer.add_scaler('accuracy', running_correct/100, cur_epoch*len(train_dataloader))
+                running_loss = 0.0
+                running_loss = 0
         # Evaludation
         model.eval()
         with torch.no_grad() :
@@ -84,18 +96,14 @@ def train():
                 if _CUDA_FLAG :
                     val_inputs = val_inputs.cuda()
                     val_labels = val_labels.cuda()
-<<<<<<< HEAD
-                _,temp_length = val_inputs.shape
-                val_outputs = model(val_inputs).view(-1,temp_length)
-                val_loss += criterion(val_outputs, val_labels)
-            print("VAL ::: EPOCH {}/{} Loss {}".format(cur_epoch+1, _EPOCHS, cur_iter, len(val_dataloader), val_loss/len(val_dataloader)))
-        
-=======
+
                 _, temp_length = val_inputs.shape
                 val_outputs = model(val_inputs).view(-1, temp_length)
+                test_output= norm.de_normlize(val_outputs)
+                val_labels = norm.normlize(val_outputs)
                 val_loss += criterion(val_outputs, val_labels)
-            print("VAL ::: EPOCH {}/{} Loss {}".format(cur_epoch+1, _EPOCHS, cur_iter, len(val_dataloader), val_loss/len(val_dataloader)))
->>>>>>> 1de75bac73576d0e14619a9d0e5722a14cbebdda
+            print("VAL ::: EPOCH {}/{} Loss {}".format(cur_epoch+1, _EPOCHS, val_loss/len(val_dataloader)))
+
 
 if __name__ == "__main__":
     train()

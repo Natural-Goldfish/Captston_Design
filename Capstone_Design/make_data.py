@@ -24,9 +24,11 @@ class PreProcessing(object):
         dataframe = pd.read_csv(self.cur_fpath, header = 0, names = ["Time", "Glucose"])
         create_days = int(len(dataframe)/96)
         days = create_days*96
-
+        print(np.array(dataframe['Glucose'][:]).max())
+        print(np.array(dataframe['Glucose'][:]).min())
         new_data_idx = 0
         idx = 0
+        
         while(True):
             # Get data from unprocessed file
             cur_glucose = int(dataframe["Glucose"][idx])

@@ -1,4 +1,9 @@
-def make_graph():
+from torch.utils.tensorboard import SummaryWriter
+writer= SummaryWriter
+
+_MIN = 0
+_MAX = 300
+def make_graph(loss,val, epoch):
     """
     This is a method to draw a graph by using our model's output. 
     This would be used to check our model's performance before we connect with our website.
@@ -8,6 +13,24 @@ def make_graph():
         
     """
     # TODO
+    writer.add_scaler('train_likelihood', loss, epoch)
+    writer.add_scaler('validation_mse', val, epoch)
+    writer.close()
+    
     
     return 0
-    
+
+class Normalization(object):
+    def __init__(self, min = _MIN, max = _MAX):
+        super().__init__()
+        self.min = min
+        self.max = max
+
+    def normlize(self,data):
+        # x- min/ max-min
+        norm_data = (data-self.min) / (self.max - self.min)
+        return norm_data
+
+    def de_normlize(self, data):
+        de_norm_data = data*(self.max-self.min)+self.min
+        return de_norm_data
