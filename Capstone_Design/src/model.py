@@ -3,8 +3,8 @@ import torch
 _SEQUENCE_LENGTH = 96*3
 _NUM_EMBEDDINGS= 300
 _EMBEDDING_DIM = 50
-_INPUT_DIM = 25
-_HIDDEN_DIM = 25
+_INPUT_DIM = 50
+_HIDDEN_DIM = 50
 
 class ASPModel(torch.nn.Module):
     """
