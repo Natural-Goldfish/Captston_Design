@@ -63,7 +63,7 @@ class PreProcessing(object):
         save_val_df.to_csv(os.path.join(_DATA_SAVE_PATH, "{}_{}.csv".format(self.save_fname, "test")), index = False)
 
     def _split_dataset(self, data_length):
-        # Assign 8 days to the validation dataset
+        # Split whole dataset to the proper ratio 8 : 2 = Train : Test 
         min_length = 96*(self.input_day + self.predict_day)
         data_length = data_length - min_length*2
         train_length = int(data_length*0.8) + min_length
