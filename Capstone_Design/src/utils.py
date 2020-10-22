@@ -26,12 +26,12 @@ class Normalization(object):
         self.min = min
         self.max = max
 
-    def normlize(self,data):
+    def normalize(self,data):
         # x- min/ max-min
         norm_data = (data-self.min) / (self.max - self.min)
         return norm_data
 
-    def de_normlize(self, data):
+    def de_normalize(self, data):
         de_norm_data = data*(self.max-self.min)+self.min
         return de_norm_data
     
