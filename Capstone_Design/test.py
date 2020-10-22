@@ -15,8 +15,11 @@ _MODEL_NAME = "test.pth"
 _INDEX = 0
 
 def test():
+    """
+    # For CMD
     args = argparse.ArgumentParser()
     args.add_argument("--model_name", type = str, required = True, help = "this is a file name to load")
+    """
     with torch.no_grad():
         norm = Normalization()
         dataset = ASPDataset(mode = 'test')
