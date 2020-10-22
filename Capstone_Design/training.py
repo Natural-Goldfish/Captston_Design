@@ -8,7 +8,7 @@ from torch.utils.tensorboard import SummaryWriter
 writer = SummaryWriter("runs\\graph")
 ##
 import torch
-import sys
+import os
 
 _SEQUENCE_LENGTH = 96*3
 _INPUT_DIM = 50
@@ -21,7 +21,7 @@ _CUDA_FLAG = torch.cuda.is_available()
 
 _MODEL_LOAD_FLAG = False
 _MODEL_PATH = "data\\models"
-_MODEL_LOAD_NAME = "ASPModel_{}_checkpoint.pth".format("temp")
+_MODEL_LOAD_NAME = "ASPModel_{}_checkpoint.pth"
 
 
 
@@ -29,7 +29,7 @@ def train():
     # Load objects for training
     train_dataset = ASPDataset(mode = "train")
     train_dataloader = DataLoader(train_dataset, batch_size = _BATCH_SIZE, shuffle = True)
-    val_dataset = ASPDataset(mode = "val")
+    val_dataset = ASPDataset(mode = "test")
     val_dataloader = DataLoader(val_dataset, batch_size = _BATCH_SIZE, shuffle = False)
 
     #Normalize
@@ -55,23 +55,32 @@ def train():
     
     ##
     for cur_epoch in range(_EPOCHS):
-        if cur_epoch == 400 :
+        # Learning Rate Scheduler
+        if cur_epoch == 300 :
             optimizer.param_groups[0]["lr"] = 0.0001
+        elif cur_epoch == 500 :
+            optimizer.param_groups[0]["lr"] = 0.00001
+            
         # Training
         model.train()
         optimizer.zero_grad()
         train_total_loss = 0.0
+
         for cur_iter, train_data in enumerate(train_dataloader):
             # Data load
             train_inputs, train_labels = train_data
             if _CUDA_FLAG :
                 train_inputs = train_inputs.cuda()
                 train_labels = train_labels.cuda()
-            _, temp_length = train_inputs.shape
 
             # Update parameters
+<<<<<<< HEAD
             train_outputs = model(train_inputs).view(-1, temp_length)
             train_labels= norm.normalize(train_labels) #normalize
+=======
+            train_outputs = model(train_inputs).view(-1, _SEQUENCE_LENGTH)
+            train_labels = norm.normalize(train_labels)       # Experimental
+>>>>>>> 380fc949fe7c165f53fb5fb66405305945d9191e
             train_loss = criterion(train_outputs, train_labels)
             train_loss.backward()
             optimizer.step()
@@ -108,9 +117,10 @@ def train():
             print("TRAIN ::: EPOCH {}/{} Iteration {}/{} Loss {:.6f}".format(cur_epoch+1, _EPOCHS, cur_iter, len(train_dataloader), train_loss))
         
         # Evaludation
-        model.eval()
         with torch.no_grad() :
+            model.eval()
             val_total_loss = 0.0
+<<<<<<< HEAD
                 val_labels = norm.normalize(val_labels)       # Experimental
                 test_labels = norm.de_normalize(val_labels)
                 test_output = norm.de_normalize(val_outputs)
@@ -127,6 +137,17 @@ def train():
             #writer.add_scalar('accuracy', val_correct, cur_epoch+1)
             #writer.add_figure(' predict vs actual', )
         writer.close()
+=======
+
+            for cur_iter, val_data in enumerate(val_dataloader):
+                # Data load
+                val_inputs, val_labels = val_data
+                if _CUDA_FLAG :
+                    val_inputs = val_inputs.cuda()
+                    val_labels = val_labels.cuda()
+
+                val_outputs = model(val_inputs).view(-1, _SEQUENCE_LENGTH)
+>>>>>>> 380fc949fe7c165f53fb5fb66405305945d9191e
                 val_loss = criterion(val_outputs, norm.normalize(val_labels))
                 val_total_loss += val_loss
                 test_output = norm.de_normalize(val_outputs)
@@ -141,7 +162,9 @@ def train():
 
         ######## TEMP CODE BLCOK ########
         writer.add_scalars("Loss", {"train_loss" : train_total_loss/len(train_dataloader), "val_loss" : val_total_loss/len(val_dataloader)}, cur_epoch)
-        if cur_epoch% 600 == 599 :  break
+        if cur_epoch% 600 == 599 :  
+            torch.save(model.state_dict(), os.path.join(_MODEL_PATH, _MODEL_LOAD_NAME.format(cur_epoch)))
+            break
         ######## TEMP CODE BLCOK ########
 
     ######## TEMP CODE BLCOK ########
