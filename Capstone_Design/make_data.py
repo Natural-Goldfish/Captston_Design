@@ -15,6 +15,8 @@ class PreProcessing(object):
         self.save_path = data_save_path
         self.save_fname = file_save_name
         self.cur_fpath = os.path.join(self.load_path, self.load_fname)
+        self.input_day = 3
+        self.predict_day = 3
         self.minutes = ["00", "15", "30", "45"]
         self.compare_minutes = [7.5, 22.5, 37.5, 52.5]
         self.new_data = {"Time" : [], "Glucose" : []}
@@ -22,8 +24,7 @@ class PreProcessing(object):
     def __call__(self):
         # Define how many day's data we gonna make
         dataframe = pd.read_csv(self.cur_fpath, header = 0, names = ["Time", "Glucose"])
-        create_days = int(len(dataframe)/96)
-        days = create_days*96
+        end_point = len(dataframe)
 
         new_data_idx = 0
         idx = 0
@@ -48,9 +49,9 @@ class PreProcessing(object):
                     new_hour, new_minutes = self._calcualte_nexttime(prev_hour, prev_minutes)
                     self._add_data(new_hour, new_minutes, np.nan)
                     new_data_idx += 1
-            if len(self.new_data["Time"]) == days : break
+            if idx == end_point : break
 
-        train_new_data, val_new_data = self._split_dataset()
+        train_new_data, val_new_data = self._split_dataset(len(self.new_data["Time"]))
         # Save train dataset
         save_train_df = pd.DataFrame(train_new_data, columns = ["Time", "Glucose"])
         save_train_df = save_train_df.interpolate(method = "values")
@@ -59,16 +60,21 @@ class PreProcessing(object):
         # Save val dataset
         save_val_df = pd.DataFrame(val_new_data, columns = ["Time", "Glucose"])
         save_val_df = save_val_df.interpolate(method = "values")
-        save_val_df.to_csv(os.path.join(_DATA_SAVE_PATH, "{}_{}.csv".format(self.save_fname, "val")), index = False)
+        save_val_df.to_csv(os.path.join(_DATA_SAVE_PATH, "{}_{}.csv".format(self.save_fname, "test")), index = False)
 
-    def _split_dataset(self):
+    def _split_dataset(self, data_length):
         # Assign 8 days to the validation dataset
+        min_length = 96*(self.input_day + self.predict_day)
+        data_length = data_length - min_length*2
+        train_length = int(data_length*0.8) + min_length
+
         train_data = {"Time" : [], "Glucose" : []}
+        train_data["Time"] = self.new_data["Time"][:train_length]
+        train_data["Glucose"] = self.new_data["Glucose"][:train_length]
+
         val_data = {"Time" : [], "Glucose" : []}
-        train_data["Time"] = self.new_data["Time"][:-96*8]
-        train_data["Glucose"] = self.new_data["Glucose"][:-96*8]
-        val_data["Time"] = self.new_data["Time"][-96*8:]
-        val_data["Glucose"] = self.new_data["Glucose"][-96*8:]
+        val_data["Time"] = self.new_data["Time"][train_length:]
+        val_data["Glucose"] = self.new_data["Glucose"][train_length:]
         return train_data, val_data
 
     def _add_data(self, new_hour, new_minutes, new_glucose):
@@ -78,8 +84,10 @@ class PreProcessing(object):
 
     def _get_time(self, time, flag):
         if flag :
+            # When I get time data from unprocessed
             cur_time = time.split(" ")[-1].split(":")
         else :
+            # When I get time data from new_data
             cur_time = time.split(":")
         return cur_time[0], cur_time[1]
 
