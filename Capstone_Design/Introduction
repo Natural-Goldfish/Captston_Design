@@ -16,5 +16,28 @@ What's the format of the Dataset        : CSV
     ㄴAre we gonna use csv file directly?
     ㄴAre we gonna save the datas as TFRecord? or something different?
 The proportion of train and val dataset : 9 : 1
+ 
+Experimental2 - 
+    Input, hidden dim = 50
+    Batch size = 128
+    L2Loss,
+    Epochs ~ 600  : lr = 0.0001
+    lstm layers = 2 / output 2048
+    Linear 2048 - 1024
+    Dropout(0.5)
+    Linear 1024 - 1024
+    Dropout(0.5)
+    Linear 1024 - 1
 
-
+Experimental3 - 
+    Input, hidden dim = 50
+    Batch size = 128
+    L2Loss, 
+    Epochs 0~ 400 : lr = 0.001 
+        400 ~ 600 : lr 0.0001
+    lstm layers   : 3 / output 2048
+    Linear 2048 - 1024
+    Dropout(0.5)
+    Linear 1024 - 1
+    Dropout(0.5)
+    

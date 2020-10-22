@@ -2,7 +2,7 @@ import torch
 
 _SEQUENCE_LENGTH = 96*3
 _NUM_EMBEDDINGS= 300
-_EMBEDDING_DIM = 25
+_EMBEDDING_DIM = 50
 _INPUT_DIM = 25
 _HIDDEN_DIM = 25
 
@@ -26,8 +26,13 @@ class ASPModel(torch.nn.Module):
 
         # Model
         self.embedding = torch.nn.Embedding(self.num_embeddings, self.embedding_dim)
-        self.lstm = torch.nn.LSTM(input_size = self.input_dim, hidden_size = self.hidden_dim)
-        self.linear = torch.nn.Linear(in_features = self.hidden_dim, out_features = 1)
+        self.lstm = torch.nn.LSTM(input_size = self.input_dim, hidden_size = self.hidden_dim, num_layers = 3)
+        self.linear1 = torch.nn.Linear(in_features = self.hidden_dim, out_features = 2048)
+        self.dropout = torch.nn.Dropout()
+        self.linear2 = torch.nn.Linear(in_features = 2048, out_features = 1024)
+        self.dropout2 = torch.nn.Dropout()
+        self.linear3 = torch.nn.Linear(in_features = 1024, out_features = 1)
+
 
     def forward(self, x):
         if type(x) != 'torch.long':
@@ -35,6 +40,11 @@ class ASPModel(torch.nn.Module):
         input_vectors = self.embedding(x)
         input_vectors = input_vectors.view(len(x), -1, self.input_dim).contiguous()
         output, _ = self.lstm(input_vectors)
-        output = self.linear(output)
+        output = self.linear1(output)
+        output = self.dropout(output)
+        output = self.linear2(output)
+        output = self.dropout2(output)
+        output = self.linear3(output)
+
         return output
 
