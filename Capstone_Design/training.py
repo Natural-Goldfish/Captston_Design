@@ -2,15 +2,11 @@ from src.model import ASPModel
 from src.dataset import *
 from src.utils import Normalization
 from torch.utils.data import DataLoader
-<<<<<<< HEAD
 ##
 import sys
 from torch.utils.tensorboard import SummaryWriter
 writer = SummaryWriter("runs\\graph")
 ##
-=======
-from torch.utils.tensorboard import SummaryWriter
->>>>>>> 37d60bcea9054c300ede78e80713fcae00684393
 import torch
 import sys
 
@@ -30,29 +26,18 @@ _MODEL_LOAD_NAME = "ASPModel_{}_checkpoint.pth".format("temp")
 
 
 def train():
-<<<<<<< HEAD
-
-=======
     # Load objects for training
->>>>>>> 37d60bcea9054c300ede78e80713fcae00684393
     train_dataset = ASPDataset(mode = "train")
     train_dataloader = DataLoader(train_dataset, batch_size = _BATCH_SIZE, shuffle = True)
     val_dataset = ASPDataset(mode = "val")
     val_dataloader = DataLoader(val_dataset, batch_size = _BATCH_SIZE, shuffle = False)
-<<<<<<< HEAD
 
     #Normalize
     norm = Normalization()
-
-
-    
-    norm = Normalization()
     # Model load
     model = ASPModel(seq_len = _SEQUENCE_LENGTH, input_dim = _INPUT_DIM, hidden_dim = _HIDDEN_DIM)
-=======
-    model = ASPModel(seq_len = _SEQUENCE_LENGTH, input_dim = _INPUT_DIM, hidden_dim = _HIDDEN_DIM, embedding_dim = _EMBEDDING_DIM)
 
->>>>>>> 37d60bcea9054c300ede78e80713fcae00684393
+
     if _MODEL_LOAD_FLAG :
         model.load_state_dict(torch.load(os.path.join(_MODEL_PATH, _MODEL_LOAD_NAME)))
     if _CUDA_FLAG : model.cuda()
@@ -90,7 +75,6 @@ def train():
             train_loss = criterion(train_outputs, train_labels)
             train_loss.backward()
             optimizer.step()
-<<<<<<< HEAD
             ##
             predicted = norm.de_normalize(train_outputs)
             #running_loss += train_loss.item()
@@ -112,7 +96,7 @@ def train():
                 print("stop!")
             val_loss = 0.0
             val_correct =0
-=======
+
             train_total_loss += train_loss.detach()
 
             ######## TEMP CODE BLCOK ########
@@ -127,17 +111,6 @@ def train():
         model.eval()
         with torch.no_grad() :
             val_total_loss = 0.0
->>>>>>> 37d60bcea9054c300ede78e80713fcae00684393
-            for cur_iter, val_data in enumerate(val_dataloader):
-                # Data load
-                val_inputs, val_labels = val_data
-                if _CUDA_FLAG :
-                    val_inputs = val_inputs.cuda()
-                    val_labels = val_labels.cuda()
-
-                _, temp_length = val_inputs.shape
-                val_outputs = model(val_inputs).view(-1, temp_length)
-<<<<<<< HEAD
                 val_labels = norm.normalize(val_labels)       # Experimental
                 test_labels = norm.de_normalize(val_labels)
                 test_output = norm.de_normalize(val_outputs)
@@ -154,7 +127,6 @@ def train():
             #writer.add_scalar('accuracy', val_correct, cur_epoch+1)
             #writer.add_figure(' predict vs actual', )
         writer.close()
-=======
                 val_loss = criterion(val_outputs, norm.normalize(val_labels))
                 val_total_loss += val_loss
                 test_output = norm.de_normalize(val_outputs)
@@ -188,7 +160,6 @@ def _test_sample(name, val_label, val_output, val_input):
         writer_test.add_scalars("Glucose", {"True" : true[i], "prediction" : predict[i]}, i)
     writer_test.close()
 ######## TEMP CODE BLCOK ########
->>>>>>> 37d60bcea9054c300ede78e80713fcae00684393
 
 if __name__ == "__main__":
     train()

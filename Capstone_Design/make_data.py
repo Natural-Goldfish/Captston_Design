@@ -24,15 +24,12 @@ class PreProcessing(object):
     def __call__(self):
         # Define how many day's data we gonna make
         dataframe = pd.read_csv(self.cur_fpath, header = 0, names = ["Time", "Glucose"])
-<<<<<<< HEAD
         create_days = int(len(dataframe)/96)
         days = create_days*96
         print(np.array(dataframe['Glucose'][:]).max())
         print(np.array(dataframe['Glucose'][:]).min())
-=======
         end_point = len(dataframe)
 
->>>>>>> 37d60bcea9054c300ede78e80713fcae00684393
         new_data_idx = 0
         idx = 0
         
