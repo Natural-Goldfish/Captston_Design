@@ -1,10 +1,15 @@
-from src.utils import linear_interpolation
-
+#from src.utils import linear_interpolation
+import os
 import pandas as pd
 import numpy as np
 from pandas import read_csv, Series, DataFrame
 from datetime import datetime
 # TODO
+_DATA_SAVE_PATH = "data\\processed"
+_DATA_LOAD_PATH = "data\\unprocessed"
+_FILE_LOAD_NAME = "70man(3).csv"
+_FILE_SAVE_NAME = "70man"
+_FILE_RESULT_NAME = "result.csv"
 
 # 1. 데이터 불러오기.
 def upload():
@@ -88,18 +93,7 @@ def interpolation():
         
     
             
-    #for dt in df[0]:
-        #dt = datetime.strptime(dt, '%Y-%m-%d %H:%M')
-        #1. 
-        #print(dt.hour, dt.minute) # 
-    #맨앞부터 돌면서 맨앞이면 내 값부터 이전으로 0시까지 만들기
-    #if(dt)
-    #먼저 하루의 데이터들을 모두 0~23시로 채워버린다. 없으면 만든다.
-    #for data in df[0]:
-    #    if()
-
-    #ts = Series([ np.nan, np.nan, 10],index = dates)
-    #ts_intp_by_time = 
+   
 #This file makes unprocessed csv file as a perfectly processed csv file for training
 #The method of linear interpolation exist in the src\utils directories.
 def interpolation2():
@@ -358,8 +352,7 @@ def interpolation2():
                                 cnt = cnt+1
                     
 
-        #realminute = realtime.minute
-        #print(df[0][cnt],df[0][cnt+1])
+       
     print(cnt)
     #시간 차이가 15분 이상 나면  csv를 분리~~ 앞에꺼 1개 뒤에꺼 1개로 따로 저장 후 뒤에꺼에 부족한 갯수만큼 추가~~~
 
@@ -374,6 +367,35 @@ def final_interpolate():
 def main():
     #interpolation2()
     final_interpolate()
-    
+    load_path = _DATA_LOAD_PATH
+    load_fname = _FILE_LOAD_NAME
+    save_path = _DATA_SAVE_PATH
+    save_fname = _FILE_SAVE_NAME
+    cur_fpath = os.path.join(load_path, load_fname)
+    train_new_data, val_new_data = _split_dataset()
+    save_train_df = pd.DataFrame(train_new_data, columns = ["Time", "Glucose"])
+    save_train_df.to_csv(os.path.join(_DATA_SAVE_PATH, "{}_{}.csv".format(save_fname, "train2")), index = False)
+
+    # Save val dataset
+    save_val_df = pd.DataFrame(val_new_data, columns = ["Time", "Glucose"])
+    save_val_df.to_csv(os.path.join(_DATA_SAVE_PATH, "{}_{}.csv".format(save_fname, "test2")), index = False)
+
+def _split_dataset():
+    final_interpolate()
+    tosplit = pd.read_csv('./data/processed/result.csv')
+    data_length = len(tosplit['Time'])-1
+    # Split whole dataset to the proper ratio 8 : 2 = Train : Test 
+    min_length = 96*(3 + 3)
+    data_length = data_length - min_length*2
+    train_length = int(data_length*0.8) + min_length
+
+    train_data = {"Time" : [], "Gluco" : []}
+    train_data["Time"] = tosplit["Time"][:train_length]
+    train_data["Glucose"] = tosplit["Gluco"][:train_length]
+
+    val_data = {"Time" : [], "Gluco" : []}
+    val_data["Time"] = tosplit["Time"][train_length:]
+    val_data["Gluco"] = tosplit["Gluco"][train_length:]
+    return train_data, val_data
 if __name__ == "__main__":
     main()

@@ -6,6 +6,7 @@ _DATA_SAVE_PATH = "data\\processed"
 _DATA_LOAD_PATH = "data\\unprocessed"
 _FILE_LOAD_NAME = "70man(3).csv"
 _FILE_SAVE_NAME = "70man"
+_FILE_RESULT_NAME = "result.csv"
 
 class PreProcessing(object):
     def __init__(self, data_load_path, file_load_name, data_save_path, file_save_name):
@@ -17,6 +18,7 @@ class PreProcessing(object):
         self.cur_fpath = os.path.join(self.load_path, self.load_fname)
         self.input_day = 3
         self.predict_day = 3
+        
         self.minutes = ["00", "15", "30", "45"]
         self.compare_minutes = [7.5, 22.5, 37.5, 52.5]
         self.new_data = {"Time" : [], "Glucose" : []}
@@ -32,6 +34,7 @@ class PreProcessing(object):
 
         new_data_idx = 0
         idx = 0
+        
         
         while(True):
             # Get data from unprocessed file
@@ -94,11 +97,18 @@ class PreProcessing(object):
         else :
             # When I get time data from new_data
             cur_time = time.split(":")
+           
+
+            
+        
         return cur_time[0], cur_time[1]
 
     def _compare_time(self, prev_hour, prev_minutes, cur_hour, cur_minutes):
+        #년 월 일 추가
+        
         prev_hour = int(prev_hour)
         prev_minutes = int(prev_minutes)
+        
         cur_hour = int(cur_hour)
         cur_minutes = int(cur_minutes)
 
@@ -121,8 +131,12 @@ class PreProcessing(object):
         index = self.minutes.index(prev_minutes)
         if index == 3 :
             if int(prev_hour) == 23 : 
-                new_hour = self.minutes[0]
+                
+                new_hour = self.minutes[0] #00시로 바꾸되 만약 prev_month가 thiry냐 thiryone이냐보고 month를 변경
+                ###
+                
                 new_minutes = self.minutes[0]
+                ###
             else : 
                 new_hour = str(int(prev_hour)+1)
                 new_minutes = self.minutes[0]

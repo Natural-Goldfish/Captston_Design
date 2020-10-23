@@ -74,13 +74,13 @@ def train():
                 train_labels = train_labels.cuda()
 
             # Update parameters
-<<<<<<< HEAD
+
             train_outputs = model(train_inputs).view(-1, temp_length)
             train_labels= norm.normalize(train_labels) #normalize
-=======
+
             train_outputs = model(train_inputs).view(-1, _SEQUENCE_LENGTH)
             train_labels = norm.normalize(train_labels)       # Experimental
->>>>>>> 380fc949fe7c165f53fb5fb66405305945d9191e
+
             train_loss = criterion(train_outputs, train_labels)
             train_loss.backward()
             optimizer.step()
@@ -120,7 +120,7 @@ def train():
         with torch.no_grad() :
             model.eval()
             val_total_loss = 0.0
-<<<<<<< HEAD
+
                 val_labels = norm.normalize(val_labels)       # Experimental
                 test_labels = norm.de_normalize(val_labels)
                 test_output = norm.de_normalize(val_outputs)
@@ -137,7 +137,7 @@ def train():
             #writer.add_scalar('accuracy', val_correct, cur_epoch+1)
             #writer.add_figure(' predict vs actual', )
         writer.close()
-=======
+
 
             for cur_iter, val_data in enumerate(val_dataloader):
                 # Data load
@@ -147,7 +147,7 @@ def train():
                     val_labels = val_labels.cuda()
 
                 val_outputs = model(val_inputs).view(-1, _SEQUENCE_LENGTH)
->>>>>>> 380fc949fe7c165f53fb5fb66405305945d9191e
+
                 val_loss = criterion(val_outputs, norm.normalize(val_labels))
                 val_total_loss += val_loss
                 test_output = norm.de_normalize(val_outputs)
