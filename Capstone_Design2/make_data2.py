@@ -17,6 +17,9 @@ class PreProcessing(object):
         self.cur_fpath = os.path.join(self.load_path, self.load_fname)
         self.input_day = 3
         self.predict_day = 3
+        self.until28 = ["2"]
+        self.until30 = ["4", "6", "9", "11"]
+        self.until31 = ["1", "3", "5", "7", "8", "10", "12"]
         self.minutes = ["00", "15", "30", "45"]
         self.compare_minutes = [7.5, 22.5, 37.5, 52.5]
         self.new_data = {"Time" : [], "Glucose" : []}
@@ -33,23 +36,23 @@ class PreProcessing(object):
         while(True):
             # Get data from unprocessed file
             cur_glucose = int(dataframe["Glucose"][idx])
-            cur_hour, cur_minutes = self._get_time(dataframe["Time"][idx], True)
+            curYMD, cur_hour, cur_minutes = self._get_time(dataframe["Time"][idx], True)
             new_hour, new_minutes = self._calcualte_newtime(cur_hour, cur_minutes, idx)
 
             # Check whether new data list is empty or not
             if not self.new_data["Time"]:
-                self._add_data(new_hour, new_minutes, cur_glucose)
+                self._add_data(curYMD, new_hour, new_minutes, cur_glucose)
                 idx += 1
                 continue
             else :
-                prev_hour, prev_minutes = self._get_time(self.new_data["Time"][new_data_idx], False)
+                prevYMD, prev_hour, prev_minutes = self._get_time(self.new_data["Time"][new_data_idx], False)
                 if self._compare_time(prev_hour, prev_minutes, new_hour, new_minutes):
-                    self._add_data(new_hour, new_minutes, cur_glucose)
+                    self._add_data(curYMD, new_hour, new_minutes, cur_glucose)
                     idx += 1
                     new_data_idx += 1
                 else:
-                    new_hour, new_minutes = self._calcualte_nexttime(prev_hour, prev_minutes)
-                    self._add_data(new_hour, new_minutes, np.nan)
+                    newYMD, new_hour, new_minutes = self._calcualte_nexttime(prevYMD, prev_hour, prev_minutes)
+                    self._add_data(newYMD, new_hour, new_minutes, np.nan)
                     new_data_idx += 1
             if idx == end_point : break
 
@@ -79,19 +82,15 @@ class PreProcessing(object):
         test_data["Glucose"] = self.new_data["Glucose"][train_length:]
         return train_data, test_data
 
-    def _add_data(self, new_hour, new_minutes, new_glucose):
-        new_time = new_hour + ":" + new_minutes
+    def _add_data(self, newYMD, new_hour, new_minutes, new_glucose):
+        new_time = newYMD + " " + new_hour + ":" + new_minutes
         self.new_data["Time"].append(new_time)
         self.new_data["Glucose"].append(new_glucose)
 
     def _get_time(self, time, flag):
-        if flag :
-            # When I get time data from unprocessed
-            cur_time = time.split(" ")[-1].split(":")
-        else :
-            # When I get time data from new_data
-            cur_time = time.split(":")        
-        return cur_time[0], cur_time[1]
+        curYMD = time.split(" ")[0]
+        cur_time = time.split(" ")[-1].split(":")
+        return curYMD, cur_time[0], cur_time[1]
 
     def _compare_time(self, prev_hour, prev_minutes, cur_hour, cur_minutes):
         prev_hour = int(prev_hour)
@@ -113,19 +112,45 @@ class PreProcessing(object):
         else :
             return False
 
-    def _calcualte_nexttime(self, prev_hour, prev_minutes):
+    def _calcualte_nexttime(self, prevYMD, prev_hour, prev_minutes):
         index = self.minutes.index(prev_minutes)
+        listYMD = prevYMD.split("-")
         if index == 3 :
             if int(prev_hour) == 23 : 
                 new_hour = self.minutes[0]
                 new_minutes = self.minutes[0]
+                if listYMD[1] in self.until28:
+                    if listYMD[2] is "28" :
+                        listYMD[1] = "03"
+                        listYMD[2] = "01"
+                    else:
+                        listYMD[2] = str(int(listYMD[2])+1)
+                elif listYMD[1] in self.until30:
+                    if listYMD[2] is "30" :
+                        listYMD[1] = self.until30(self.until30.index(listYMD[1])) + 1
+                        listYMD[2] = "01"
+                    else:
+                        listYMD[2] = str(int(listYMD[2])+1)
+                elif listYMD[1] in self.until31:
+                    if listYMD[2] is "31" :
+                        index = self.until31.index(listYMD[1])
+                        if index == 5 :
+                            listYMD[0] = str(int(listYMD[0]) + 1)
+                            listYMD[1] = "01"
+                            listYMD[2] = "01"
+                        else:
+                            listYMD[1] = self.until31(self.until31.index(listYMD[1])) + 1
+                            listYMD[2] = "01"
+                    else:
+                        listYMD[2] = str(int(listYMD[2])+1)
             else : 
                 new_hour = str(int(prev_hour)+1)
                 new_minutes = self.minutes[0]
         else:
             new_hour = str(prev_hour)
             new_minutes = self.minutes[index+1]
-        return new_hour, new_minutes
+        newYMD = listYMD[0] + "-" + listYMD[1] + "-" + listYMD[2]
+        return newYMD, new_hour, new_minutes
 
     def _calcualte_newtime(self, cur_hour, cur_minutes, idx):
         """

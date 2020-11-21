@@ -98,7 +98,6 @@ def train():
             break
     writer.close()
 
-######## TEMP CODE BLCOK ########
 def _test_sample(name, label, output, input):
     tempWriter = SummaryWriter("{}".format(name))
     input_data = input[0]
@@ -109,7 +108,6 @@ def _test_sample(name, label, output, input):
     for i in range(288*2):
         tempWriter.add_scalars("Glucose", {"True" : true[i], "prediction" : predict[i]}, i)
     tempWriter.close()
-######## TEMP CODE BLCOK ########
 
 if __name__ == "__main__":
     train()
