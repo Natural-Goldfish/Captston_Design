@@ -23,7 +23,6 @@ class ASPDataset(Dataset):
         self.predict_length = 3
         self.sequence_length =  3
         self.dataset_length = len(self.dataframe) - (self.predict_length*_DAY + self.sequence_length*_DAY) + 1
-
         
     def __len__(self):
         return self.dataset_length

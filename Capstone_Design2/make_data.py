@@ -18,7 +18,6 @@ class PreProcessing(object):
         self.cur_fpath = os.path.join(self.load_path, self.load_fname)
         self.input_day = 3
         self.predict_day = 3
-        
         self.minutes = ["00", "15", "30", "45"]
         self.compare_minutes = [7.5, 22.5, 37.5, 52.5]
         self.new_data = {"Time" : [], "Glucose" : []}
@@ -28,13 +27,10 @@ class PreProcessing(object):
         dataframe = pd.read_csv(self.cur_fpath, header = 0, names = ["Time", "Glucose"])
         create_days = int(len(dataframe)/96)
         days = create_days*96
-        print(np.array(dataframe['Glucose'][:]).max())
-        print(np.array(dataframe['Glucose'][:]).min())
         end_point = len(dataframe)
 
         new_data_idx = 0
         idx = 0
-        
         
         while(True):
             # Get data from unprocessed file
@@ -96,19 +92,12 @@ class PreProcessing(object):
             cur_time = time.split(" ")[-1].split(":")
         else :
             # When I get time data from new_data
-            cur_time = time.split(":")
-           
-
-            
-        
+            cur_time = time.split(":")        
         return cur_time[0], cur_time[1]
 
     def _compare_time(self, prev_hour, prev_minutes, cur_hour, cur_minutes):
-        #년 월 일 추가
-        
         prev_hour = int(prev_hour)
         prev_minutes = int(prev_minutes)
-        
         cur_hour = int(cur_hour)
         cur_minutes = int(cur_minutes)
 
@@ -118,7 +107,6 @@ class PreProcessing(object):
         else : 
             prev_hour = prev_hour*60
             cur_hour = cur_hour*60
-
         previous = prev_hour + prev_minutes
         current = cur_hour + cur_minutes
 
@@ -131,12 +119,8 @@ class PreProcessing(object):
         index = self.minutes.index(prev_minutes)
         if index == 3 :
             if int(prev_hour) == 23 : 
-                
-                new_hour = self.minutes[0] #00시로 바꾸되 만약 prev_month가 thiry냐 thiryone이냐보고 month를 변경
-                ###
-                
+                new_hour = self.minutes[0]
                 new_minutes = self.minutes[0]
-                ###
             else : 
                 new_hour = str(int(prev_hour)+1)
                 new_minutes = self.minutes[0]

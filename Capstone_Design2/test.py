@@ -20,64 +20,41 @@ _INDEX = 0
 _DATA_LOAD_PATH = "./data/processed/"
 _FILE_TEST_NAME = "70man_test2.csv"
 _FILE_TRAIN_NAME = "70man_train2.csv"
+
 def test():
-    # For CMD
-    #parser = argparse.ArgumentParser()
-    #parser.add_argument("--model_name", type = str, required = True, help = "this is a csv file name to load")
-    #parser.add_argument("--index", type = int, required = True, help = "this is a index you will load in the test csv file")
-    #args = parser.parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--model_name", type = str, required = True, help = "this is a csv file name to load")
+    parser.add_argument("--index", type = int, required = True, help = "this is a index you will load in the test csv file")
+    args = parser.parse_args()
     mode = ['train', 'test']
 
     with torch.no_grad():
         norm = Normalization()
-        dataset = ASPDataset(mode = 'test')
-        input_data, label = dataset[_INDEX]
-        
+        test_dataset = ASPDataset(mode = 'test')
+        input_data, label = test_dataset[_INDEX]
 
         model = ASPModel()
-        #model.load_state_dict(torch.load(os.path.join(_MODEL_PATH, _MODEL_NAME.format(args.model_name))))
+        model.load_state_dict(torch.load(os.path.join(_MODEL_PATH, _MODEL_NAME.format(args.model_name))))
         model.eval()
 
         if _CUDA_FLAG :
+            model.cuda()
             input_data = input_data.cuda()
             label = label.cuda()
-            model.cuda()
 
         output = model(input_data)
         prediction = norm.de_normalize(output).view(-1)
-        
-
-        
-       
-
-        for _, mode in enumerate(mode):
-            dataset = ASPDataset(mode = mode)
-            input_data, label = dataset[_INDEX]
-
-            model = ASPModel()
-            device = torch.device('cpu')
+        """
+        visual(input_data, prediction, label, mode)
+        #1.당뇨 체크 기준 1 (혈당 200이상인 구간 존재유뮤)
+        #checkingdiabete(input_data,label,mode)
             
-            #model.load_state_dict(torch.load(os.path.join(_MODEL_PATH, _MODEL_NAME.format(args.model_name)),map_location=device))
-            model.eval()
+        #2.당뇨 체크 기준 2 (식전 혈당과 식후 혈당 차이가 과다 유뮤)
+        #find_meattime(input_data, label,mode)
 
-            if _CUDA_FLAG :
-                input_data = input_data.cuda()
-                label = label.cuda()
-                model.cuda()
-
-            output = model(input_data)
-            prediction = norm.de_normalize(output).view(-1)
-
-            visual(input_data, prediction, label, mode)
-            #1.당뇨 체크 기준 1 (혈당 200이상인 구간 존재유뮤)
-            #checkingdiabete(input_data,label,mode)
-            
-            #2.당뇨 체크 기준 2 (식전 혈당과 식후 혈당 차이가 과다 유뮤)
-            #find_meattime(input_data, label,mode)
-
-            #3.당뇨 체크 기준 3 ( 잠들기 전에 혈당 수치 정도)
-            #이건 이제 만들어야 함.
-
+        #3.당뇨 체크 기준 3 ( 잠들기 전에 혈당 수치 정도)
+        #이건 이제 만들어야 함.
+        """
         plt.show()
             
 

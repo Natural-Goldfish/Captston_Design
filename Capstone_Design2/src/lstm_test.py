@@ -7,7 +7,6 @@ INPUT_DIM = 1
 class custom_LSTM(torch.nn.Module):
     def __init__(self, seq_len = SEQ_LEN, hidden_dim = HIDDEN_DIM, input_dim = INPUT_DIM, embedding_dim = EMBEDDING_DIM):
         super().__init__()
-        
         self.seq_len = seq_len
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim

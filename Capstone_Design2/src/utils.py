@@ -16,8 +16,6 @@ def make_graph(loss,val, epoch):
     writer.add_scaler('train_likelihood', loss, epoch)
     writer.add_scaler('validation_mse', val, epoch)
     writer.close()
-    
-    
     return 0
 
 class Normalization(object):
