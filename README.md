@@ -1,2 +1,2 @@
-# Captstone_Design
+# Captstone_Design2
 Diabetes prediction project
