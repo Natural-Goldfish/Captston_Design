@@ -17,9 +17,9 @@ class PreProcessing(object):
         self.cur_fpath = os.path.join(self.load_path, self.load_fname)
         self.input_day = 3
         self.predict_day = 3
-        self.until28 = ["2"]
-        self.until30 = ["4", "6", "9", "11"]
-        self.until31 = ["1", "3", "5", "7", "8", "10", "12"]
+        self.until28 = ["02"]
+        self.until30 = ["04", "06", "09", "11"]
+        self.until31 = ["01", "03", "05", "07", "08", "10", "12"]
         self.minutes = ["00", "15", "30", "45"]
         self.compare_minutes = [7.5, 22.5, 37.5, 52.5]
         self.new_data = {"Time" : [], "Glucose" : []}
@@ -120,26 +120,26 @@ class PreProcessing(object):
                 new_hour = self.minutes[0]
                 new_minutes = self.minutes[0]
                 if listYMD[1] in self.until28:
-                    if listYMD[2] is "28" :
+                    if listYMD[2] == "28" :
                         listYMD[1] = "03"
                         listYMD[2] = "01"
                     else:
                         listYMD[2] = str(int(listYMD[2])+1)
                 elif listYMD[1] in self.until30:
-                    if listYMD[2] is "30" :
+                    if listYMD[2] == "30" :
                         listYMD[1] = self.until30(self.until30.index(listYMD[1])) + 1
                         listYMD[2] = "01"
                     else:
                         listYMD[2] = str(int(listYMD[2])+1)
                 elif listYMD[1] in self.until31:
-                    if listYMD[2] is "31" :
+                    if listYMD[2] == "31" :
                         index = self.until31.index(listYMD[1])
                         if index == 5 :
                             listYMD[0] = str(int(listYMD[0]) + 1)
                             listYMD[1] = "01"
                             listYMD[2] = "01"
                         else:
-                            listYMD[1] = self.until31(self.until31.index(listYMD[1])) + 1
+                            listYMD[1] = str(int(self.until31[index]) + 1)
                             listYMD[2] = "01"
                     else:
                         listYMD[2] = str(int(listYMD[2])+1)
