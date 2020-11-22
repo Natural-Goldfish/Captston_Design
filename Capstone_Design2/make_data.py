@@ -124,13 +124,22 @@ class PreProcessing(object):
                         listYMD[1] = "03"
                         listYMD[2] = "01"
                     else:
-                        listYMD[2] = str(int(listYMD[2])+1)
+                        if int(listYMD[2]) < 9 :
+                            listYMD[2] = "0" + str(int(listYMD[2])+1)    
+                        else : listYMD[2] = str(int(listYMD[2])+1)
+
                 elif listYMD[1] in self.until30:
                     if listYMD[2] == "30" :
-                        listYMD[1] = self.until30(self.until30.index(listYMD[1])) + 1
+                        index = self.until30.index(listYMD[1])
+                        if int(listYMD[1]) < 9 :
+                            listYMD[1] = "0" + str(int(self.until30[index]) + 1)
+                        else : listYMD[1] = str(int(self.until30[index]) + 1)
                         listYMD[2] = "01"
                     else:
-                        listYMD[2] = str(int(listYMD[2])+1)
+                        if int(listYMD[2]) < 9 :
+                            listYMD[2] = "0" + str(int(listYMD[2])+1)    
+                        else : listYMD[2] = str(int(listYMD[2])+1)
+
                 elif listYMD[1] in self.until31:
                     if listYMD[2] == "31" :
                         index = self.until31.index(listYMD[1])
@@ -139,10 +148,14 @@ class PreProcessing(object):
                             listYMD[1] = "01"
                             listYMD[2] = "01"
                         else:
-                            listYMD[1] = str(int(self.until31[index]) + 1)
+                            if int(listYMD[1]) < 9 :
+                                listYMD[1] = "0" + str(int(self.until31[index]) + 1)
+                            else : listYMD[1] = str(int(self.until31[index]) + 1)
                             listYMD[2] = "01"
                     else:
-                        listYMD[2] = str(int(listYMD[2])+1)
+                        if int(listYMD[2]) < 9 :
+                            listYMD[2] = "0" + str(int(listYMD[2])+1)    
+                        else : listYMD[2] = str(int(listYMD[2])+1)
             else : 
                 new_hour = str(int(prev_hour)+1)
                 new_minutes = self.minutes[0]
