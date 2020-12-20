@@ -24,10 +24,11 @@ class Normalization(object):
     def de_normalize(self, data):
         de_norm_data = data*(self.max-self.min)+self.min
         return de_norm_data
-    
+
+"""
 
 def visual(input_data, prediction, label, mode):
-
+    
     predict_graph = np.array(torch.cat((input_data, prediction), dim = 0))
     true_graph = np.array(torch.cat((input_data, label), dim = 0))
 
@@ -172,3 +173,4 @@ def find_meattime(input_data,label,mode):
     plt.axis(limit)
     plt.legend()
     plt.grid()
+"""
