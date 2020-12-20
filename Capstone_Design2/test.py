@@ -7,7 +7,7 @@ import os
 
 _CUDA_FLAG = torch.cuda.is_available()
 _MODEL_PATH = "data\\models"
-_MODEL_NAME = "Temp35_{}_checkpoint.pth"
+_MODEL_NAME = "Temp21_{}_checkpoint.pth"
 _INDEX = 0
 _DATA_LOAD_PATH = "./data/processed/"
 _FILE_TEST_NAME = "70man_test.csv"
@@ -19,26 +19,27 @@ def test():
     parser.add_argument("--index", type = int, required = True, help = "this is a index you will load in the test csv file")
     args = parser.parse_args()
     mode = ['train', 'test']
-
+    
     with torch.no_grad():
         norm = Normalization()
         test_dataset = ASPDataset(mode = 'test')
         input_data, label = test_dataset[args.index]
-
         model = ASPModel()
-        model.load_state_dict(torch.load(os.path.join(_MODEL_PATH, _MODEL_NAME.format(args.model_name))))
+        model.load_state_dict(torch.load(os.path.join(_MODEL_PATH, _MODEL_NAME.format(args.model_name)),map_location=torch.device('cpu')))
         model.eval()
 
-        if _CUDA_FLAG :
+        '''if _CUDA_FLAG :
             model.cuda()
             input_data = input_data.cuda()
             label = label.cuda()
+        '''
         input_data = input_data.unsqueeze(0)
         output = model(input_data)
         prediction = norm.de_normalize(output).view(-1)
+        input_data = input_data.squeeze(0)
         visual(input_data.squeeze(0).cpu(), prediction.cpu(), label.cpu(), 'test', args.index)
-        #checkingdiabete(input_data.cpu(), label.cpu(), 'test', args.index)
-        #find_meattime(input_data.cpu(), label.cpu(), 'test')
+        #checkingdiabete(input_data.cpu(), prediction.cpu(), label.cpu(), 'test', args.index)
+        #find_meattime(input_data.cpu(),prediction.cpu(), label.cpu(), 'test')
         """
         visual(input_data, prediction, label, mode)
         #1.당뇨 체크 기준 1 (혈당 200이상인 구간 존재유뮤)
@@ -109,17 +110,18 @@ def visual(input_data, prediction, label, mode, timeIdx):
     plt.legend()
     plt.grid()
 
-def checkingdiabete(input_data, label, mode, timeIdx):
+def checkingdiabete(input_data,prediction, label, mode, timeIdx):
     #실제 사용자의 혈당그래프를 분석
     limit = [1, 576, 0, 300]
     fig = plt.figure("{} DATASET".format(mode.upper()))
     true_graph = np.array(torch.cat((input_data,label),dim =0))
+    predict_graph = np.array(torch.cat((input_data, prediction), dim = 0))
     #200넘는 혈당 갯수 체크
     dangervalue = []
     dangertime = []
     countdanger=0
-    for idx,above in enumerate(true_graph):
-        if above >= 200:
+    for idx,above in enumerate(predict_graph):
+        if above >= 189:
             dangervalue.append(above)
             dangertime.append(idx)
             #true_graph[idx] = np.nan
@@ -128,7 +130,7 @@ def checkingdiabete(input_data, label, mode, timeIdx):
             dangervalue.append(np.nan)
             dangertime.append(idx)
             
-    percent_of_danger = int(countdanger/len(true_graph)*100)
+    percent_of_danger = int(countdanger/len(predict_graph)*100)
 
     test_time = pd.read_csv(_DATA_LOAD_PATH +_FILE_TEST_NAME)
     danger_period =[]
@@ -136,7 +138,7 @@ def checkingdiabete(input_data, label, mode, timeIdx):
         danger_period.append(test_time['Time'][i])
     test_predict_time = test_time['Time'][timeIdx:timeIdx + 576]
     
-    plt.plot(test_predict_time, true_graph, color = 'blue',label = 'true')
+    plt.plot(test_predict_time, predict_graph, color = 'green',label = 'predict')
     plt.plot(test_predict_time,dangervalue, color = 'red', label =str(percent_of_danger)+'%')
     plt.xticks(test_predict_time[::80])
     plt.title('Checking above 200(mg/dL)')
@@ -145,44 +147,45 @@ def checkingdiabete(input_data, label, mode, timeIdx):
     plt.grid()
 
 
-def find_meattime(input_data,label,mode):
+def find_meattime(input_data,prediction,label,mode):
     #실제 사용자의 혈당그래프를 분석
     limit = [1, 576, 0, 300]
     fig = plt.figure("{} DATASET".format(mode.upper()))
     test_time = pd.read_csv(_DATA_LOAD_PATH+_FILE_TEST_NAME)
+    predict_graph = np.array(torch.cat((input_data, prediction), dim = 0))
     true_graph = np.array(torch.cat((input_data,label),dim =0))
     #목적 : 식후1시간 혈당 구간 찾아내기
     afvalue = [] #식전 혈당
     aftime = [] #식전 혈당 시간
     countdanger=0
-    for idx,above in enumerate(true_graph):
+    for idx,above in enumerate(predict_graph):
         if idx >= 4: #idx가 맨 마지막에서 4번째까지만 진행
-            if true_graph[idx] >= 25 + true_graph[idx-4] and true_graph[idx-4] >= 80 and true_graph[idx] >=140:
+            if predict_graph[idx] >= 25 + predict_graph[idx-4] and predict_graph[idx-4] >= 80 and predict_graph[idx] >=140:
                 #1시간 뒤 혈당이 지금 혈당보다 35이상 높다면
-                if idx+3 < len(true_graph)-1:
-                    if true_graph[idx] > true_graph[idx+3]+25 or true_graph[idx]>=100:
-                        afvalue.append(true_graph[idx])
-                        if true_graph[idx] >=180:
+                if idx+3 < len(predict_graph)-1:
+                    if predict_graph[idx] > predict_graph[idx+3]+25 or predict_graph[idx]>=100:
+                        afvalue.append(predict_graph[idx])
+                        if predict_graph[idx] >=180:
                             countdanger+=1
                     else:
                         afvalue.append(np.nan)
                 else:
-                    if true_graph[idx]>140:
-                        afvalue.append(true_graph[idx])
+                    if predict_graph[idx]>140:
+                        afvalue.append(predict_graph[idx])
                     else:
                         afvalue.append(np.nan)
-            elif true_graph[idx] >= 25 +true_graph[idx-3] and true_graph[idx-3] > 100:
-                if true_graph[idx] >= 100:
-                    afvalue.append(true_graph[idx])
-                    if true_graph[idx] >= 180:
+            elif predict_graph[idx] >= 25 + predict_graph[idx-3] and predict_graph[idx-3] > 100:
+                if predict_graph[idx] >= 100:
+                    afvalue.append(predict_graph[idx])
+                    if predict_graph[idx] >= 180:
                         countdanger+=1
                 else:
                     afvalue.append(np.nan)
             
             else:
-                if true_graph[idx] >= 180:
+                if predict_graph[idx] >= 180:
                     #200이 넘는 혈당 구간은 반드시 식후 혈당의 피크 부분에 포함됨이 분명
-                    afvalue.append(true_graph[idx])
+                    afvalue.append(predict_graph[idx])
                     countdanger+=1
                 else:
                     afvalue.append(np.nan)
@@ -190,10 +193,10 @@ def find_meattime(input_data,label,mode):
             afvalue.append(np.nan)
         
     test_predict_time = test_time['Time'][1:577]
-    danger_afmeat = int(countdanger/len(true_graph)*100)
+    danger_afmeat = int(countdanger/len(predict_graph)*100)
     danger_line = [180 for i in range(1,577)]
     plt.plot(test_predict_time,danger_line, color = 'purple', label = 'dangerline')
-    plt.plot(test_predict_time, true_graph, color = 'blue',label = 'true')
+    plt.plot(test_predict_time, predict_graph, color = 'green',label = 'predict')
     plt.plot(test_predict_time,afvalue, color = 'red', label =str(danger_afmeat)+'%')
     plt.xticks(test_predict_time[::80])
     plt.title('After meet 1~2hours\n'+'above 180(mg/dL) danger')
