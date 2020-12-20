@@ -32,7 +32,7 @@ def train():
         model.load_state_dict(torch.load(os.path.join(_MODEL_PATH, _MODEL_LOAD_NAME)))
     if _CUDA_FLAG : model.cuda()
 
-    criterion = torch.nn.L1Loss()
+    criterion = torch.nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr = _LEARNING_RATE)
     norm = Normalization()
     
